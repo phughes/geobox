@@ -111,36 +111,36 @@ class Geobox:
 		scope = decimal.Decimal(str(scope)).quantize(NUM_PLACES, rounding= decimal.ROUND_HALF_UP)
 		adjusted_scope = None
 		# keep scope within the bounds
-		if scope < SCOPE_SIZES[0]:
-			adjusted_scope = SCOPE_SIZES[0]
-		else:
-			for s in SCOPE_SIZES:
-				if scope > s:
+		if scope >= SCOPE_SIZES[-1]:
+			adjusted_scope = SCOPE_SIZES[-1]
+ 		else:
+			for s in reversed(SCOPE_SIZES):
+				if scope < s:
 					adjusted_scope = s
 		
 		return adjusted_scope
 	
 	def extend_right(self, scope):
-		r = self.round_down(self.longitude, scope) + scope
-		if abs(self.longitude - r) > scope * MARGIN:
+		r = self.round_down(self.longitude, scope)
+		if abs(self.longitude - r) < scope * MARGIN:
 			return True
 		return False
 		
 	def extend_down(self, scope):
 		b = self.round_down(self.latitude, scope)
-		if abs(self.latitude - b) > scope * MARGIN:
+		if abs(self.latitude - b) < scope * MARGIN:
 			return True
 		return False
 
 	def extend_left(self, scope):
-		l = self.round_down(self.longitude, scope) - scope
-		if abs(l - self.longitude) > scope * MARGIN:
+		l = self.round_down(self.longitude, scope) + scope
+		if abs(l - self.longitude) < scope * MARGIN:
 			return True
 		return False
 
 	def extend_up(self, scope):
 		t = self.round_down(self.latitude, scope) + scope
-		if abs(t - self.latitude) > scope * MARGIN:
+		if abs(t - self.latitude) < scope * MARGIN:
 			return True
 		return False
 
@@ -148,9 +148,9 @@ class Geobox:
 		try:
 			remainder = coord % scope
 			if coord > 0:
-				return coord - remainder + scope
-			else:
 				return coord - remainder
+			else:
+				return coord + remainder
 		except decimal.InvalidOperation:
 			#logging.info('returning coordinate untouched')
 			# This happens when the scope is too small for the current coordinate.
@@ -159,8 +159,46 @@ class Geobox:
 			return coord
 
 	
+def test():
+	print("testing geobox.py")
+	lat = "43.16956"
+	lon = "-77.61139"
+	print("init with coordinates: " + lat + " & " + lon)
+	gb = Geobox(lat, lon)
+	test_gb(gb)
+	lat = "-43.16956"
+	lon = "77.61139"
+	print("init with coordinates: " + lat + " & " + lon)
+	gb = Geobox(lat, lon)
+	test_gb(gb)
+	print("\n\nTests finished")
 	
 	
+def test_gb(gb):
+	for scope in SCOPE_SIZES:
+		print("\n\nSetting scope size: " + str(scope))
+		print("\n-------testing latitude expansion:------------")
+		print("margin size: " + str(scope * MARGIN))
+		print("rounded: " + str(gb.round_down(gb.latitude, scope)) + " less than lat: " + str(gb.latitude) + " ?")
+		
+		print(str(abs(gb.round_down(gb.latitude, scope) + scope - gb.latitude)) + " < " + str(scope * MARGIN))
+		print("extend_up: " + str(gb.extend_up(scope)))
+		print(str(abs(gb.latitude - gb.round_down(gb.latitude, scope))) + " < " + str(scope * MARGIN))
+		print("extend_down: " + str(gb.extend_down(scope)))
+		
+		print("\n-------testing longitude expansion:------------")
+		print("margin size: " + str(scope * MARGIN))
+		print("rounded: " + str(gb.round_down(gb.longitude, scope)) + " less than lat: " + str(gb.longitude) + " ?")
+		
+		print(str(abs(gb.round_down(gb.longitude, scope) - gb.longitude)) + " < " + str(scope * MARGIN))
+		print("extend_right: " + str(gb.extend_right(scope)))
+		print(str(abs(gb.round_down(gb.longitude, scope) + scope - gb.longitude)) + " < " + str(scope * MARGIN))
+		print("extend_left: " + str(gb.extend_left(scope)))
+
+		
+	
+if __name__ == "__main__":
+  test()
 	
 	
 	
