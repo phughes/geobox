@@ -150,7 +150,7 @@ class Geobox:
 			if coord > 0:
 				return coord - remainder
 			else:
-				return coord + remainder
+				return coord - remainder - scope
 		except decimal.InvalidOperation:
 			#logging.info('returning coordinate untouched')
 			# This happens when the scope is too small for the current coordinate.
