@@ -21,12 +21,12 @@ http://code.google.com/p/google-app-engine-samples/source/browse/#svn/trunk/24hr
 
 The goal here is to provide a simplified interface for geobox
 searching. This version is implemented as a class which you 
-initialize with coordinates, and request a set of geoboxes for
-storage in the db. 
+initialize with coordinates, and request a list of geobox strings
+for storage in the db. 
 
-To search for stored objects we initialize with a coordinate
-and a scope, request a set of boxes to search on. Then this
-set is passed to the query.
+To search for stored objects we initialize with coordinates
+and a scope, request a box to search on. The box is returned
+as a string. This string is passed to the query.
 
 pat@phughes.us (Patrick Hughes)
 """
@@ -80,20 +80,18 @@ class Geobox:
 		
 		
 	def search_geoboxes(self, scope):
-		# returns the list of geoboxes to pass to a Query object
-		# generally this should be the smallest box that 
-		# encompasses scope, though if the coordinates are near the 
-		# edge of that box it will also return up to 3 adjacent boxes
+		# Returns a geobox to pass to a Query object.
+		# Generally this should be the smallest box that 
+		# encompasses scope.
 		scope = self.nearest_scope(scope)
 		
 		#logging.info('creating geopboxes for scope: ' + str(scope))
 		#logging.info('latitude: ' + str(self.latitude) + ' longitude: ' + str(self.longitude))
 				
-		list = []
-		list.append(self.bounding_box(self.latitude, self.longitude, scope))
+		box = self.bounding_box(self.latitude, self.longitude, scope))
 
-		# convert the tupples in the list into strings
-		return [self.string_for_bounding_box(box) for box in list]
+		# convert the tupples in into a string
+		return self.string_for_bounding_box(box)
 		
 	# calculates a bounding box
 	def bounding_box(self, lat, lon, scope):
@@ -154,7 +152,7 @@ class Geobox:
 		except decimal.InvalidOperation:
 			#logging.info('returning coordinate untouched')
 			# This happens when the scope is too small for the current coordinate.
-			# That means we've already got zeros in the slice's position, so we're
+			# That means we've already got zeros in the scope's position, so we're
 			# already rounded down as far as we can go.
 			return coord
 
