@@ -79,7 +79,7 @@ class Geobox:
 		return [self.string_for_bounding_box(box) for box in list]
 		
 		
-	def search_geoboxes(self, scope):
+	def search_geobox(self, scope):
 		# Returns a geobox to pass to a Query object.
 		# Generally this should be the smallest box that 
 		# encompasses scope.
